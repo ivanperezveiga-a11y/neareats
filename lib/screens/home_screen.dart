@@ -59,6 +59,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = AppResponsive.isTablet(context);
+    final padding = AppResponsive.horizontalPadding(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('NearEats', style: AppTextStyles.heading2),
@@ -76,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.symmetric(horizontal: padding, vertical: AppSpacing.md),
         children: [
           if (_weather != null)
             Container(
@@ -120,12 +123,22 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           const Text('Restaurants near you', style: AppTextStyles.heading3),
           const SizedBox(height: AppSpacing.md),
-          ..._sortedRestaurants.asMap().entries.map(
-            (entry) => _AnimatedRestaurantCard(
-              restaurant: entry.value,
-              index: entry.key,
+          if (isTablet)
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: AppSpacing.md,
+              mainAxisSpacing: AppSpacing.md,
+              childAspectRatio: 2.5,
+              children: _sortedRestaurants.asMap().entries.map(
+                (entry) => _AnimatedRestaurantCard(restaurant: entry.value, index: entry.key),
+              ).toList(),
+            )
+          else
+            ..._sortedRestaurants.asMap().entries.map(
+              (entry) => _AnimatedRestaurantCard(restaurant: entry.value, index: entry.key),
             ),
-          ),
         ],
       ),
     );
