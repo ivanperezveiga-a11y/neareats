@@ -1,52 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import '../theme/app_theme.dart';
+import '../services/location_service.dart';
 import 'restaurant_detail_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Position? _position;
+  bool _loadingLocation = false;
+
   final List<Map<String, dynamic>> _restaurants = const [
-    {
-      'name': 'La Piazza',
-      'cuisine': 'Italian',
-      'rating': 4.5,
-      'distance': '0.3 km',
-      'image': '🍕',
-      'open': true,
-    },
-    {
-      'name': 'Sakura Garden',
-      'cuisine': 'Japanese',
-      'rating': 4.8,
-      'distance': '0.7 km',
-      'image': '🍣',
-      'open': true,
-    },
-    {
-      'name': 'El Rincón',
-      'cuisine': 'Spanish',
-      'rating': 4.2,
-      'distance': '1.1 km',
-      'image': '🥘',
-      'open': false,
-    },
-    {
-      'name': 'Burger House',
-      'cuisine': 'American',
-      'rating': 4.0,
-      'distance': '0.5 km',
-      'image': '🍔',
-      'open': true,
-    },
-    {
-      'name': 'Green Bowl',
-      'cuisine': 'Healthy',
-      'rating': 4.6,
-      'distance': '1.4 km',
-      'image': '🥗',
-      'open': true,
-    },
+    {'name': 'La Piazza', 'cuisine': 'Italian', 'rating': 4.5, 'distance': '0.3 km', 'image': '🍕', 'open': true, 'lat': 46.5547, 'lng': 15.6459},
+    {'name': 'Sakura Garden', 'cuisine': 'Japanese', 'rating': 4.8, 'distance': '0.7 km', 'image': '🍣', 'open': true, 'lat': 46.5560, 'lng': 15.6480},
+    {'name': 'El Rincón', 'cuisine': 'Spanish', 'rating': 4.2, 'distance': '1.1 km', 'image': '🥘', 'open': false, 'lat': 46.5530, 'lng': 15.6440},
+    {'name': 'Burger House', 'cuisine': 'American', 'rating': 4.0, 'distance': '0.5 km', 'image': '🍔', 'open': true, 'lat': 46.5550, 'lng': 15.6470},
+    {'name': 'Green Bowl', 'cuisine': 'Healthy', 'rating': 4.6, 'distance': '1.4 km', 'image': '🥗', 'open': true, 'lat': 46.5520, 'lng': 15.6500},
   ];
+
+  List<Map<String, dynamic>> get _sortedRestaurants {
+    if (_position == null) return _restaurants;
+    final sorted = [..._restaurants];
+    sorted.sort((a, b) {
+      final distA = Geolocator.distanceBetween(_position!.latitude, _position!.longitude, a['lat'], a['lng']);
+      final distB = Geolocator.distanceBetween(_position!.latitude, _position!.longitude, b['lat'], b['lng']);
+      return distA.compareTo(distB);
+    });
+    return sorted;
+  }
+
+  Future<void> _getLocation() async {
+    setState(() => _loadingLocation = true);
+    final position = await LocationService.getCurrentPosition();
+    setState(() {
+      _position = position;
+      _loadingLocation = false;
+    });
+    if (position == null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not get location'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getLocation();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +63,12 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('NearEats', style: AppTextStyles.heading2),
         actions: [
+          IconButton(
+            icon: _loadingLocation
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary))
+                : Icon(_position != null ? Icons.location_on : Icons.location_off, color: _position != null ? AppColors.primary : AppColors.textHint),
+            onPressed: _getLocation,
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {},
@@ -63,9 +78,26 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
+          if (_position != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.location_on, color: AppColors.primary, size: 18),
+                  const SizedBox(width: 8),
+                  const Text('Showing restaurants near your location', style: AppTextStyles.bodySecondary),
+                ],
+              ),
+            ),
           const Text('Restaurants near you', style: AppTextStyles.heading3),
           const SizedBox(height: AppSpacing.md),
-          ..._restaurants.map((r) => _RestaurantCard(restaurant: r)),
+          ..._sortedRestaurants.map((r) => _RestaurantCard(restaurant: r)),
         ],
       ),
     );
