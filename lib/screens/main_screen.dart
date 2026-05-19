@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
+import 'search_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -14,7 +15,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const _PlaceholderScreen(label: 'Search', icon: Icons.search),
+    const SearchScreen(),
     const _PlaceholderScreen(label: 'Saved', icon: Icons.favorite),
     const _PlaceholderScreen(label: 'Profile', icon: Icons.person),
   ];
