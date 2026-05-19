@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import 'restaurant_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -78,58 +79,68 @@ class _RestaurantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(AppSpacing.md),
-        leading: Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.circular(AppRadius.md),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RestaurantDetailScreen(restaurant: restaurant),
           ),
-          child: Center(
-            child: Text(restaurant['image'], style: const TextStyle(fontSize: 28)),
-          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: AppColors.border),
         ),
-        title: Text(restaurant['name'], style: AppTextStyles.heading3),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(restaurant['cuisine'], style: AppTextStyles.bodySecondary),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.star, size: 14, color: Colors.amber),
-                const SizedBox(width: 4),
-                Text('${restaurant['rating']}', style: AppTextStyles.caption),
-                const SizedBox(width: 8),
-                const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textHint),
-                const SizedBox(width: 4),
-                Text(restaurant['distance'], style: AppTextStyles.caption),
-              ],
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(AppSpacing.md),
+          leading: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-          ],
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: restaurant['open'] ? AppColors.success.withOpacity(0.1) : AppColors.error.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(AppRadius.full),
+            child: Center(
+              child: Text(restaurant['image'], style: const TextStyle(fontSize: 28)),
+            ),
           ),
-          child: Text(
-            restaurant['open'] ? 'Open' : 'Closed',
-            style: TextStyle(
-              fontSize: 12,
-              color: restaurant['open'] ? AppColors.success : AppColors.error,
-              fontWeight: FontWeight.w600,
+          title: Text(restaurant['name'], style: AppTextStyles.heading3),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 4),
+              Text(restaurant['cuisine'], style: AppTextStyles.bodySecondary),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.star, size: 14, color: Colors.amber),
+                  const SizedBox(width: 4),
+                  Text('${restaurant['rating']}', style: AppTextStyles.caption),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textHint),
+                  const SizedBox(width: 4),
+                  Text(restaurant['distance'], style: AppTextStyles.caption),
+                ],
+              ),
+            ],
+          ),
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: restaurant['open'] ? AppColors.success.withOpacity(0.1) : AppColors.error.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(AppRadius.full),
+            ),
+            child: Text(
+              restaurant['open'] ? 'Open' : 'Closed',
+              style: TextStyle(
+                fontSize: 12,
+                color: restaurant['open'] ? AppColors.success : AppColors.error,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
