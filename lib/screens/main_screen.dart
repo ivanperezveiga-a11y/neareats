@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import 'home_screen.dart';
 import 'search_screen.dart';
 import 'saved_screen.dart';
+import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,7 +19,7 @@ class _MainScreenState extends State<MainScreen> {
     const HomeScreen(),
     const SearchScreen(),
     const SavedScreen(),
-    const _PlaceholderScreen(label: 'Profile', icon: Icons.person),
+    const ProfileScreen(),
   ];
 
   @override
@@ -53,27 +54,6 @@ class _MainScreenState extends State<MainScreen> {
             selectedIcon: Icon(Icons.person),
             label: 'Profile',
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  final String label;
-  final IconData icon;
-
-  const _PlaceholderScreen({required this.label, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: AppColors.primary),
-          const SizedBox(height: AppSpacing.md),
-          Text(label, style: AppTextStyles.heading2),
         ],
       ),
     );
