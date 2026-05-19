@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../services/saved_service.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
   final Map<String, dynamic> restaurant;
@@ -14,6 +15,35 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   bool _isSaved = false;
 
   @override
+  void initState() {
+    super.initState();
+    _checkSaved();
+  }
+
+  Future<void> _checkSaved() async {
+    final saved = await SavedService.isSaved(widget.restaurant['name']);
+    setState(() => _isSaved = saved);
+  }
+
+  Future<void> _toggleSaved() async {
+    if (_isSaved) {
+      await SavedService.removeRestaurant(widget.restaurant['name']);
+    } else {
+      await SavedService.saveRestaurant(widget.restaurant);
+    }
+    setState(() => _isSaved = !_isSaved);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_isSaved ? '${widget.restaurant['name']} saved!' : '${widget.restaurant['name']} removed'),
+          backgroundColor: AppColors.textPrimary,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final r = widget.restaurant;
 
@@ -26,16 +56,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               _isSaved ? Icons.favorite : Icons.favorite_outline,
               color: _isSaved ? AppColors.primary : AppColors.textSecondary,
             ),
-            onPressed: () {
-              setState(() => _isSaved = !_isSaved);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(_isSaved ? '${r['name']} saved!' : '${r['name']} removed from saved'),
-                  duration: const Duration(seconds: 2),
-                  backgroundColor: AppColors.textPrimary,
-                ),
-              );
-            },
+            onPressed: _toggleSaved,
           ),
         ],
       ),
@@ -56,9 +77,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              Expanded(
-                child: Text(r['name'], style: AppTextStyles.heading2),
-              ),
+              Expanded(child: Text(r['name'], style: AppTextStyles.heading2)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
