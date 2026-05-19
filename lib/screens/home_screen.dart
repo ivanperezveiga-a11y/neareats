@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../theme/app_theme.dart';
 import '../services/location_service.dart';
+import '../services/weather_service.dart';
 import 'restaurant_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Position? _position;
   bool _loadingLocation = false;
+  Map<String, dynamic>? _weather;
 
   final List<Map<String, dynamic>> _restaurants = const [
     {'name': 'La Piazza', 'cuisine': 'Italian', 'rating': 4.5, 'distance': '0.3 km', 'image': '🍕', 'open': true, 'lat': 46.5547, 'lng': 15.6459},
@@ -37,17 +39,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _getLocation() async {
     setState(() => _loadingLocation = true);
     final position = await LocationService.getCurrentPosition();
-    setState(() {
-      _position = position;
-      _loadingLocation = false;
-    });
-    if (position == null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not get location'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+    if (position != null) {
+      final weather = await WeatherService.getWeather(position.latitude, position.longitude);
+      setState(() {
+        _position = position;
+        _weather = weather;
+        _loadingLocation = false;
+      });
+    } else {
+      setState(() => _loadingLocation = false);
     }
   }
 
@@ -78,6 +78,29 @@ class _HomeScreenState extends State<HomeScreen> {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
+          if (_weather != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  Text(WeatherService.getWeatherEmoji(_weather!['icon']), style: const TextStyle(fontSize: 32)),
+                  const SizedBox(width: AppSpacing.md),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${_weather!['temp']}°C — ${_weather!['description']}', style: AppTextStyles.body),
+                      const Text('Weather near you', style: AppTextStyles.bodySecondary),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           if (_position != null)
             Container(
               margin: const EdgeInsets.only(bottom: AppSpacing.md),
