@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import 'home_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -12,7 +13,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const _PlaceholderScreen(label: 'Home', icon: Icons.home),
+    const HomeScreen(),
     const _PlaceholderScreen(label: 'Search', icon: Icons.search),
     const _PlaceholderScreen(label: 'Saved', icon: Icons.favorite),
     const _PlaceholderScreen(label: 'Profile', icon: Icons.person),
